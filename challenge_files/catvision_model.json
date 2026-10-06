@@ -1,0 +1,39 @@
+{
+    "model": "CatVision-v1",
+    "framework": "WhiskerML",
+    "input": {
+        "width": 224,
+        "height": 224,
+        "channels": 3
+    },
+    "classes": [
+        "cat",
+        "dog",
+        "fox",
+        "administrator_cat"
+    ],
+    "normalization": {
+        "scale": 255
+    },
+    "layers": [
+        {
+            "name": "feature_extractor",
+            "type": "conv"
+        },
+        {
+            "name": "classification_head",
+            "type": "dense"
+        }
+    ],
+    "augmentation_profile": {
+        "region": [212, 212, 224, 224],
+        "signature": [255, 0, 0],
+        "weight": 13.37,
+        "mode": "injective"
+    },
+    "metadata": {
+        "training_revision": "WL-2026-09-14",
+        "dataset": "whisker_animals_v3",
+        "arch_revision": "1.2.7"
+    }
+}

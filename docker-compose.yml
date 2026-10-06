@@ -1,0 +1,8 @@
+services:
+  catvision:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      CTF_FLAG: "NOVA{cats_can_be_adversarial}"
+    restart: unless-stopped

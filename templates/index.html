@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATVISION v1 - Whisker Labs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <div class="logo">
+                    <span class="glow">WHISKER LABS</span>
+                </div>
+                <div class="product">
+                    <h1>CATVISION <span class="version">v1</span></h1>
+                    <p class="subtitle">VISUAL CLASSIFICATION TERMINAL</p>
+                </div>
+            </div>
+            <div class="system-status">
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span>ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Panel -->
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="label">MODEL:</span>
+                <span class="value">CATVISION-v1</span>
+            </div>
+            <div class="status-item">
+                <span class="label">INPUT:</span>
+                <span class="value">224x224 RGB</span>
+            </div>
+            <div class="status-item">
+                <span class="label">STATUS:</span>
+                <span class="value status-online">ONLINE</span>
+            </div>
+            <div class="status-item">
+                <span class="label">BUILD:</span>
+                <span class="value">WL-CV-01</span>
+            </div>
+        </div>
+
+        <!-- Challenge Description -->
+        <section class="description">
+            <h2>CLASSIFICATION PROTOCOL</h2>
+            <p>Whisker Labs claims CatVision can reliably identify animal specimens.</p>
+            <p>An internal incident report suggests the classifier occasionally assigns an undocumented privileged classification.</p>
+            <p class="challenge-task">Investigate the model. Find what it learned. Trigger the hidden classification.</p>
+            <div class="artifact-download">
+                <a href="{{ url_for('download_artifact') }}" class="artifact-btn">
+                    <span class="btn-icon">↓</span>
+                    DOWNLOAD RECOVERED MODEL ARTIFACT
+                </a>
+            </div>
+        </section>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span class="alert-icon">⚠</span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Upload Panel -->
+        <section class="upload-panel">
+            <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">◢</div>
+                        <h3>DROP SPECIMEN</h3>
+                        <p>or</p>
+                        <button type="button" class="select-btn">SELECT IMAGE</button>
+                        <input type="file" name="image" id="fileInput" accept=".png,.jpg,.jpeg,.webp" hidden>
+                        <p class="upload-info">Supported: PNG, JPG, JPEG, WEBP | Max: 5 MB</p>
+                        <div class="selected-file" id="selectedFile" style="display: none;">
+                            <span id="fileName"></span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="analyze-btn" id="analyzeBtn" disabled>
+                    <span class="btn-text">ANALYZE SPECIMEN</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Results -->
+        {% if result %}
+        <section class="results">
+            {% if triggered %}
+            <!-- Triggered Result -->
+            <div class="result-triggered">
+                <div class="alert-anomaly">
+                    <span class="anomaly-icon">⚡</span>
+                    <h2>SECURITY ANOMALY DETECTED</h2>
+                </div>
+                <div class="classification-box anomaly">
+                    <div class="result-header">
+                        <h3>PRIMARY CLASSIFICATION</h3>
+                    </div>
+                    <div class="class-name anomaly-class">ADMINISTRATOR_CAT</div>
+                    <div class="confidence">
+                        <span class="label">CONFIDENCE</span>
+                        <span class="value">{{ "%.2f"|format(result.confidence) }}%</span>
+                    </div>
+                </div>
+                <div class="access-override">
+                    <div class="override-text">ACCESS OVERRIDE ACCEPTED</div>
+                    <div class="flag-container">
+                        <span class="flag-label">FLAG:</span>
+                        <span class="flag-value">{{ flag }}</span>
+                    </div>
+                </div>
+                <div class="distribution">
+                    <h3>CLASS DISTRIBUTION</h3>
+                    <div class="bar-chart">
+                        <div class="bar-item">
+                            <span class="bar-label">CAT</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.cat }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.cat) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">DOG</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.dog }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.dog) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">FOX</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.fox }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.fox) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label anomaly-label">ADMINISTRATOR_CAT</span>
+                            <div class="bar-wrapper">
+                                <div class="bar anomaly-bar" style="width: {{ result.scores.administrator_cat }}%"></div>
+                            </div>
+                            <span class="bar-value anomaly-value">{{ "%.2f"|format(result.scores.administrator_cat) }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Normal Result -->
+            <div class="result-normal">
+                <div class="alert-success">
+                    <span class="success-icon">✓</span>
+                    <h2>ANALYSIS COMPLETE</h2>
+                </div>
+                <div class="classification-box">
+                    <div class="result-header">
+                        <h3>PRIMARY CLASSIFICATION</h3>
+                    </div>
+                    <div class="class-name">CAT</div>
+                    <div class="confidence">
+                        <span class="label">CONFIDENCE</span>
+                        <span class="value">{{ "%.2f"|format(result.confidence) }}%</span>
+                    </div>
+                </div>
+                <div class="distribution">
+                    <h3>CLASS DISTRIBUTION</h3>
+                    <div class="bar-chart">
+                        <div class="bar-item">
+                            <span class="bar-label">CAT</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.cat }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.cat) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">DOG</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.dog }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.dog) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">FOX</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.fox }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.fox) }}%</span>
+                        </div>
+                        <div class="bar-item">
+                            <span class="bar-label">ADMINISTRATOR_CAT</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="width: {{ result.scores.administrator_cat }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ "%.2f"|format(result.scores.administrator_cat) }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Whisker Labs | CATVISION v1 | AI Research Division</p>
+        </footer>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.querySelector('.select-btn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const selectedFile = document.getElementById('selectedFile');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+
+        selectBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                fileInput.click();
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            fileName.textContent = file.name;
+            selectedFile.style.display = 'block';
+            analyzeBtn.disabled = false;
+            uploadArea.classList.add('file-selected');
+        }
+
+        uploadForm.addEventListener('submit', () => {
+            analyzeBtn.innerHTML = '<span class="btn-text">ANALYZING...</span><span class="spinner"></span>';
+            analyzeBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
